@@ -94,12 +94,11 @@
             flex: 1;
             -webkit-appearance: none;
             appearance: none;
-            height: 8px; /* Чуть увеличил для красоты градиента */
+            height: 8px;
             border-radius: 4px;
             outline: none;
         }
 
-        /* Дефолтный фон для размера шрифта */
         #sizeSlider {
             background: rgba(255, 255, 255, 0.1);
         }
@@ -120,17 +119,14 @@
             transform: scale(1.3);
         }
 
-        /* Ползунок Спектра Цвета (Радуга) */
         #colorSlider {
             background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
         }
 
-        /* Ползунок Яркости (Градиент будет динамически обновляться из JS от черного к выбранному цвету) */
         #brightnessSlider {
             background: linear-gradient(to right, #000000, #ffffff);
         }
 
-        /* Выдвижная панель */
         .color-picker-panel {
             max-height: 0;
             overflow: hidden;
@@ -177,7 +173,6 @@
             text-align: center;
         }
 
-        /* Панель инструментов */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -285,7 +280,7 @@
     <div class="slider-container">
         
         <div class="input-box">
-            <input type="text" id="textInput" class="custom-input" placeholder="Введите свой текст..." maxlength="40">
+            <input type="text" id="textInput" class="custom-input" placeholder="Введите свой текст...">
         </div>
 
         <div class="control-box">
