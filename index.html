@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Font & Color Editor</title>
+    <style>
+        @font-face {
+            font-family: 'CustomFont21063';
+            src: url('21063.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'CustomFont20552';
+            src: url('20552.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0b0914;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            padding: 30px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-box {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .custom-input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .control-box {
+            width: 100%;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: #8a8a9e;
+            min-width: 50px;
+            text-align: left;
+        }
+
+        .range-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px; /* Чуть увеличил для красоты градиента */
+            border-radius: 4px;
+            outline: none;
+        }
+
+        /* Дефолтный фон для размера шрифта */
+        #sizeSlider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+
+        .range-slider::-webkit-slider-thumb:active {
+            transform: scale(1.3);
+        }
+
+        /* Ползунок Спектра Цвета (Радуга) */
+        #colorSlider {
+            background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+        }
+
+        /* Ползунок Яркости (Градиент будет динамически обновляться из JS от черного к выбранному цвету) */
+        #brightnessSlider {
+            background: linear-gradient(to right, #000000, #ffffff);
+        }
+
+        /* Выдвижная панель */
+        .color-picker-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, margin 0.3s ease-out;
+            opacity: 0;
+        }
+
+        .color-picker-panel.open {
+            max-height: 140px;
+            margin-bottom: 15px;
+            opacity: 1;
+        }
+
+        .slider-wrapper {
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .font-card {
+            padding: 30px 15px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .font-preview {
+            font-size: 48px;
+            line-height: 1.3;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+            word-break: break-word;
+            text-align: center;
+        }
+
+        .font-name {
+            font-size: 14px;
+            color: #636370;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* Панель инструментов */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+        }
+
+        .left-tools {
+            display: flex;
+            gap: 6px;
+        }
+
+        .align-btn, .palette-btn {
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: #636370;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .align-btn svg, .palette-btn svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        .align-btn svg path, .palette-btn svg path {
+            fill: currentColor;
+        }
+
+        .align-btn.active, .palette-btn.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .color-indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+
+        .nav-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:active, .align-btn:active, .palette-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            background: #ffffff;
+            color: #0b0914;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .action-btn:active {
+            background: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        @media (hover: hover) {
+            .nav-btn:hover { background: rgba(255, 255, 255, 0.1); }
+            .align-btn:hover, .palette-btn:hover { color: #fff; }
+            .action-btn:hover { background: #f0f0f0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slider-container">
+        
+        <div class="input-box">
+            <input type="text" id="textInput" class="custom-input" placeholder="Введите свой текст..." maxlength="40">
+        </div>
+
+        <div class="control-box">
+            <span class="control-label">Размер</span>
+            <input type="range" id="sizeSlider" class="range-slider" min="16" max="100" value="48">
+            <span class="control-label" id="sizeLabel" style="min-width:35px; text-align:right;">48px</span>
+        </div>
+
+        <div class="color-picker-panel" id="colorPanel">
+            <div class="control-box">
+                <span class="control-label">Цвет</span>
+                <input type="range" id="colorSlider" class="range-slider" min="0" max="360" value="0">
+                <span class="control-label" style="min-width:20px; text-align:right;"><span class="color-indicator" id="indicator"></span></span>
+            </div>
+            <div class="control-box">
+                <span class="control-label">Яркость</span>
+                <input type="range" id="brightnessSlider" class="range-slider" min="15" max="100" value="100">
+                <span class="control-label" id="brightLabel" style="min-width:35px; text-align:right;">100%</span>
+            </div>
+        </div>
+
+        <div class="slider-wrapper">
+            <div class="font-card">
+                <div class="font-preview" id="fontPreview">Aa</div>
+                <div class="font-name" id="fontName">21063.otf</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="left-tools">
+                <button class="align-btn" data-align="left" id="alignLeft">
+                    <svg viewBox="0 0 24 24"><path d="M3 15h18v2H3zm0-4h12v2H3zm0-4h18v2H3zm0 12h12v2H3z"/></svg>
+                </button>
+                <button class="align-btn active" data-align="center" id="alignCenter">
+                    <svg viewBox="0 0 24 24"><path d="M3 15h18v2H3zm4-4h10v2H7zm-4-4h18v2H3zm4 12h10v2H7z"/></svg>
+                </button>
+                <button class="align-btn" data-align="right" id="alignRight">
+                    <svg viewBox="0 0 24 24"><path d="M3 15h18v2H3zm6-4h12v2H9zm-6-4h18v2H3zm6 12h12v2H9z"/></svg>
+                </button>
+                
+                <button class="palette-btn" id="paletteBtn">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-10 10c0 5.523 4.477 10 10 10a1 1 0 0 0 1-1v-1.5a2.5 2.5 0 0 1 2.5-2.5H19a3 3 0 0 0 3-3c0-6.627-4.477-11-10-11zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3.5 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+                </button>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-btn" id="prevBtn">&#10094;</button>
+                <button class="nav-btn" id="nextBtn">&#10095;</button>
+            </div>
+        </div>
+
+        <button class="action-btn" id="applyBtn">Сделать</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
